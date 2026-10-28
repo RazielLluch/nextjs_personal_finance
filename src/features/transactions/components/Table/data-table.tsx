@@ -1,6 +1,12 @@
 "use client"
 
-import { useTable, type ColumnDef, type RowData } from "@tanstack/react-table"
+import { useState } from "react"
+import {
+  useTable,
+  type ColumnDef,
+  type ExpandedState,
+  type RowData,
+} from "@tanstack/react-table"
 
 import {
   Table,
@@ -24,12 +30,19 @@ export function DataTable<TData extends RowData>({
                                                    data,
                                                    getSubRows,
                                                  }: DataTableProps<TData>) {
-  const table = useTable({
-    features,
-    data,
-    columns,
-    getSubRows,
-  })
+  const [expanded, setExpanded] = useState<ExpandedState>({})
+
+  const table = useTable(
+    {
+      features,
+      data,
+      columns,
+      getSubRows,
+      state: { expanded },
+      onExpandedChange: setExpanded,
+      autoResetExpanded: false,
+    },
+  )
 
   return (
     <div className="overflow-hidden rounded-md border">
