@@ -29,6 +29,8 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
+*.log
+.eslintcache
 
 # env files (can opt-in for committing if needed)
 .env*
@@ -39,6 +41,20 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# generated Prisma client
+/src/server/generated/prisma/
 /.idea/inspectionProfiles/Project_Default.xml
 /.idea/vcs.xml
 .idea/
+/generated/prisma
+
+# local AI/editor skill files
+/.agents/
+/.claude/
+/.windsurf/
+
+# local test and build reports
+/test-results/
+/playwright-report/
+/blob-report/
