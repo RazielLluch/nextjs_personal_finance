@@ -36,5 +36,5 @@ export const CategoryRenderer: React.FC<CategoryRendererProps> = ({ category, ro
 export const AmountCellRenderer: React.FC<{ amount: number }> = ({ amount }) => {
   const formattedAmount = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount);
 
-  return <div className="flex justify-end">{formattedAmount}</div>;;
+  return <div className="flex justify-end">{formattedAmount}</div>;
 }
