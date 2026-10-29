@@ -48,7 +48,7 @@ export function toTransactionTableRows(
     return {
       id: `transaction-${transaction.id}`,
       date: transaction.date,
-      payee: subRows.length === 1 ? subRows[0].payee : "Multiple",
+      payee: getSplitPayee(subRows),
       remark: transaction.remark,
       category: subRows.length === 1 ? subRows[0].category : "Split transaction",
       payment:
@@ -62,4 +62,16 @@ export function toTransactionTableRows(
       subRows: subRows.length > 1 ? subRows : undefined,
     }
   })
+}
+
+function getSplitPayee(subRows: TransactionTableRow[]) {
+  const payees = [...new Set(
+    subRows
+      .map((row) => row.payee.trim())
+      .filter(Boolean),
+  )]
+
+  if (payees.length === 0) return ""
+  if (payees.length === 1) return payees[0]
+  return "multiple"
 }

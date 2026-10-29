@@ -10,7 +10,6 @@ import {
   AmountCellRenderer
 } from "@src/features/transactions/components/Table/cells";
 
-// Use `accessor` for data columns and `display` for columns without one.
 const columnHelper = createColumnHelper<DataTableFeatures, TransactionTableRow>()
 
 const HeaderCell = ({ children }: { children: React.ReactNode }) => (
@@ -21,40 +20,40 @@ const HeaderCell = ({ children }: { children: React.ReactNode }) => (
 
 export const columns = columnHelper.columns([
   columnHelper.accessor("date", {
-    header: <HeaderCell>date</HeaderCell>,
+    header: () => <HeaderCell>date</HeaderCell>,
     cell: ({ getValue }) => <DateCellRenderer date={getValue()} />,
     meta: {
       style: { textAlign: 'center', maxWidth: '100px' },
     }
   }),
   columnHelper.accessor("payee", {
-    header: <HeaderCell>payee</HeaderCell>,
+    header: () => <HeaderCell>payee</HeaderCell>,
     meta: {
       style: { textAlign: 'center', maxWidth: '150px' },
     }
   }),
   columnHelper.accessor("remark", {
-    header: <HeaderCell>remark</HeaderCell>,
+    header: () => <HeaderCell>remark</HeaderCell>,
     meta: {
       style: { textAlign: 'center', maxWidth: '200px' },
     }
   }),
   columnHelper.accessor("category", {
-    header: <HeaderCell>category</HeaderCell>,
+    header: () => <HeaderCell>category</HeaderCell>,
     cell: ({ getValue, row }) => <CategoryRenderer category={getValue()} row={row}/>,
     meta: {
       style: { textAlign: 'center', maxWidth: '150px' },
     }
   }),
   columnHelper.accessor("payment", {
-    header: <HeaderCell>payment</HeaderCell>,
+    header: () => <HeaderCell>payment</HeaderCell>,
     cell: ({ getValue }) => <AmountCellRenderer amount={getValue()} />,
     meta: {
       style: { textAlign: 'center', maxWidth: '150px' },
     }
   }),
   columnHelper.accessor("deposit", {
-    header: <HeaderCell>deposit</HeaderCell>,
+    header: () => <HeaderCell>deposit</HeaderCell>,
     cell: ({ getValue }) => <AmountCellRenderer amount={getValue()} />,
     meta: {
       style: { textAlign: 'center', maxWidth: '150px' },
