@@ -20,7 +20,6 @@ export function serializeTransaction(
 ): Transaction {
   return {
     id: Number(record.id),
-    account_id: Number(record.account_id),
     remark: record.remark ?? "",
     date: record.date,
     type,
@@ -33,11 +32,7 @@ export function serializeTransaction(
       category: item.category ?? "",
       payee: Number(item.payee_id ?? 0),
       remark: item.remark ?? "",
-      created_at: item.created_at,
-      ...(item.updated_at ? {updated_at: item.updated_at} : {}),
     })),
-    created_at: record.created_at,
-    ...(record.updated_at ? {updated_at: record.updated_at} : {}),
   }
 }
 

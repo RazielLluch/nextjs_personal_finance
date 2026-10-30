@@ -1,12 +1,9 @@
 export type Transaction = {
   id: number
-  account_id: number
   remark: string
   date: Date
   type: "payment" | "deposit"
   items: TransactionItem[]
-  created_at: Date
-  updated_at?: Date
 }
 
 export type TransactionItem = {
@@ -16,8 +13,6 @@ export type TransactionItem = {
   category: string
   payee: number
   remark: string
-  created_at: Date
-  updated_at?: Date
 }
 
 export type TransactionTableRow = {
