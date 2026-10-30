@@ -12,7 +12,11 @@ export const DateCellRenderer: React.FC<DateCellRendererProps> = ({ date }) => {
 
 interface CategoryRendererProps {
   category: string;
-  row: any; // Update the type if you know more about the shape of row
+  row: {
+    getCanExpand: () => boolean;
+    getIsExpanded: () => boolean;
+    getToggleExpandedHandler: () => () => void;
+  };
 }
 
 export const CategoryRenderer: React.FC<CategoryRendererProps> = ({ category, row }) => {

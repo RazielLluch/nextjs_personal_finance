@@ -43,7 +43,7 @@ export function DataTable<TData extends RowData>({
   const [activeSplitId, setActiveSplitId] = useState<string | null>(null)
   const tableContainerRef = useRef<HTMLDivElement>(null)
 
-  const table = useTable(
+  const table = useTable<typeof features, TData>(
     {
       features,
       data,
@@ -54,7 +54,12 @@ export function DataTable<TData extends RowData>({
         const next =
           typeof updater === "function" ? updater(expanded) : updater
 
-        if (activeSplitId && expanded[activeSplitId] && !next[activeSplitId]) {
+        const wasExpanded =
+          expanded !== true && activeSplitId ? expanded[activeSplitId] : false
+        const isExpanded =
+          next !== true && activeSplitId ? next[activeSplitId] : false
+
+        if (activeSplitId && wasExpanded && !isExpanded) {
           const splitRow = table
             .getRowModel()
             .rows.find((row) => row.id === activeSplitId)
@@ -129,7 +134,7 @@ export function DataTable<TData extends RowData>({
                   <TableRow
                     data-transaction-group={transactionGroup}
                     onPointerDown={() => {
-                      if (parentRow?.original.subRows?.length) {
+                      if (parentRow && getSubRows?.(parentRow.original as TData)?.length) {
                         setActiveSplitId(parentRow.id)
                       }
                     }}

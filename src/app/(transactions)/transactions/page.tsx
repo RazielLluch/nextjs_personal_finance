@@ -1,10 +1,10 @@
 "use client"
 
-import {useState} from "react"
+import {useEffect, useState} from "react"
 import {TransactionsDataTable} from "@src/features/transactions/components/Table/transactions-data-table"
-import {transactions} from "@src/features/transactions/TempData"
 import {
   toTransactionTableRows,
+  type Transaction,
   type TransactionTableRow,
 } from "@src/features/transactions/types"
 
@@ -28,8 +28,78 @@ const getSplitPayee = (subRows: TransactionTableRow[]) => {
 }
 
 export default function TransactionsPage() {
-  const [data, setData] = useState(() => toTransactionTableRows(transactions))
+  const [data, setData] = useState<TransactionTableRow[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [unbalancedSplit, setUnbalancedSplit] = useState<SplitEdit | null>(null)
+
+  useEffect(() => {
+    let isMounted = true
+
+    const loadTransactions = async () => {
+      try {
+        const response = await fetch("/api/transactions")
+        if (!response.ok) {
+          throw new Error("Unable to load transactions")
+        }
+
+        const payload = (await response.json()) as Array<
+          Omit<Transaction, "date" | "created_at" | "updated_at" | "items"> & {
+            date: string
+            created_at: string
+            updated_at?: string
+            items: Array<
+              Omit<Transaction["items"][number], "created_at" | "updated_at"> & {
+                created_at: string
+                updated_at?: string
+              }
+            >
+          }
+        >
+        const transactions: Transaction[] = payload.map((transaction) => {
+          const {updated_at: transactionUpdatedAt, ...transactionFields} = transaction
+
+          return {
+            ...transactionFields,
+            date: new Date(transaction.date),
+            created_at: new Date(transaction.created_at),
+            ...(transactionUpdatedAt
+              ? {updated_at: new Date(transactionUpdatedAt)}
+              : {}),
+            items: transaction.items.map((item) => {
+              const {updated_at: itemUpdatedAt, ...itemFields} = item
+
+              return {
+                ...itemFields,
+                created_at: new Date(item.created_at),
+                ...(itemUpdatedAt
+                  ? {updated_at: new Date(itemUpdatedAt)}
+                  : {}),
+              }
+            }),
+          }
+        })
+
+        if (isMounted) {
+          setData(toTransactionTableRows(transactions))
+          setError(null)
+        }
+      } catch (loadError) {
+        if (isMounted) {
+          setError(loadError instanceof Error ? loadError.message : "Unable to load transactions")
+        }
+      } finally {
+        if (isMounted) {
+          setIsLoading(false)
+        }
+      }
+    }
+
+    void loadTransactions()
+    return () => {
+      isMounted = false
+    }
+  }, [])
 
   const updateRow = (
     row: TransactionTableRow,
@@ -212,40 +282,43 @@ export default function TransactionsPage() {
         </p>
       </div>
 
-      <TransactionsDataTable
-        data={data}
-        onCellEdit={updateRow}
-        onTransactionCommit={(transaction) => {
-          // Replace this callback with the database mutation when the backend is available.
-          void transaction
-        }}
-        renderCellAction={(row, columnId) =>
-          unbalancedSplit?.parentId === row.id &&
-          unbalancedSplit.editedColumn === columnId ? (
-            <div className="absolute left-1/2 top-full z-30 mt-3 w-56 -translate-x-1/3 rounded-xl border-2 border-foreground bg-background p-3 text-center text-xs shadow-lg">
-              <span className="absolute -top-3 left-[68%] h-5 w-5 -translate-x-1/2 rotate-45 border-l-2 border-t-2 border-foreground bg-background" />
-              <span className="absolute -top-2 left-[68%] h-3 w-3 -translate-x-1/2 rotate-45 bg-background" />
-              <p className="font-medium">Split transaction is not balanced.</p>
-              <div className="mt-2 flex justify-center gap-2">
-                <button
-                  type="button"
-                  className="rounded border px-2 py-1"
-                  onClick={distributeSplit}
-                >
-                  Distribute
-                </button>
-                <button
-                  type="button"
-                  className="rounded border px-2 py-1"
-                  onClick={addSplit}
-                >
-                  Add split
-                </button>
+      {isLoading ? <p>Loading transactions...</p> : null}
+      {error ? <p role="alert">{error}</p> : null}
+      {!isLoading && !error ? (
+        <TransactionsDataTable
+          data={data}
+          onCellEdit={updateRow}
+          onTransactionCommit={(transaction) => {
+            void transaction
+          }}
+          renderCellAction={(row, columnId) =>
+            unbalancedSplit?.parentId === row.id &&
+            unbalancedSplit.editedColumn === columnId ? (
+              <div className="absolute left-1/2 top-full z-30 mt-3 w-56 -translate-x-1/3 rounded-xl border-2 border-foreground bg-background p-3 text-center text-xs shadow-lg">
+                <span className="absolute -top-3 left-[68%] h-5 w-5 -translate-x-1/2 rotate-45 border-l-2 border-t-2 border-foreground bg-background" />
+                <span className="absolute -top-2 left-[68%] h-3 w-3 -translate-x-1/2 rotate-45 bg-background" />
+                <p className="font-medium">Split transaction is not balanced.</p>
+                <div className="mt-2 flex justify-center gap-2">
+                  <button
+                    type="button"
+                    className="rounded border px-2 py-1"
+                    onClick={distributeSplit}
+                  >
+                    Distribute
+                  </button>
+                  <button
+                    type="button"
+                    className="rounded border px-2 py-1"
+                    onClick={addSplit}
+                  >
+                    Add split
+                  </button>
+                </div>
               </div>
-            </div>
-          ) : null
-        }
-      />
+            ) : null
+          }
+        />
+      ) : null}
     </main>
   )
 }
